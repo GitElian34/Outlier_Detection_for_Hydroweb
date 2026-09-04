@@ -1,4 +1,4 @@
-[# Outlier_Detection_DL
+# Outlier_Detection_DL
 
 Pipeline complet de détection d'anomalies sur des séries de niveau d'eau, combinant :
 - **Altimétrie satellite** (HydroWeb Next) et **mesures in-situ** (réseau SCHAPI),
@@ -345,6 +345,21 @@ Charge un yaml de config et lance `neuralhydrology.nh_run.start_run()`. Seed fix
 
 Chaque yaml pointe vers un `data_dir` + `train_basin_file`/`validation_basin_file` — vérifier la cohérence avec la sortie des étapes 4/masquage (§8, §10) avant de lancer.
 
+### Modèles déjà entraînés (fournis dans le repo)
+
+Les 6 modèles utilisés pour les résultats du stage sont inclus directement dans `runs/` (poids + config, ~25-30 Mo au total — pas les logs d'entraînement complets) :
+
+| Dossier (`runs/`) | Type | Masquage | Époque retenue |
+|---|---|---|---|
+| `arlstm_DtoD80_1506_150002` | DtoD | 80% | 12 |
+| `arlstm_DtoD90_1606_111709` | DtoD | 90% | 14 |
+| `arlstm_DtoD96_1606_164901` | DtoD | 96% | 13 |
+| `arlstm_DtoD80_quantile_3006_155128` | Quantile | 80% | 19 |
+| `arlstm_DtoD90_quantile_3006_154719` | Quantile | 90% | 16 |
+| `arlstm_DtoD96_quantile_3006_155152` | Quantile | 96% | 19 |
+
+Chaque dossier contient `model_epoch{N}.pt` (poids du modèle), `optimizer_state_epoch{N}.pt` (état de l'optimiseur, utile seulement pour reprendre l'entraînement) et `config.yml` (hyperparamètres/`dynamic_inputs` utilisés) — directement réutilisables par les scripts d'évaluation (§12) sans avoir à ré-entraîner.
+
 ---
 
 ## 12. Évaluation
@@ -401,4 +416,3 @@ Principe commun : **une seule source de vérité par étape**, tous les sous-mod
 - **Notebooks cartographie** (`Plot_Stations_on_Map.ipynb`, `Carte_verif_sword.ipynb`) — patchés en discussion (chemins + schéma BDD) mais pas encore déposés dans `Exploring_results/`.
 - **Clés API en dur** (§1) — à sortir en variables d'environnement si le repo doit un jour être rendu public.
 - **`requirements.txt`** — versions non pinnées ; à figer si une reproductibilité stricte est nécessaire.
-](https://github.com/GitElian34/Outlier_Detection_for_Hydroweb)
