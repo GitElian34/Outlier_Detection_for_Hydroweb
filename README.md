@@ -82,9 +82,12 @@ Outlier_Detection_DL/
 ├── database/                          # BDD SQLite (hydroweb_next_France.db, insitu_data.db, ...)
 │
 ├── Evaluation_Model/
-│   ├── Compare_to_insitu.py           # matching SWORD + métriques modèle vs in-situ
-│   ├── Eval_Models_classic.py         # éval zero-shot modèles "Classic" (10j/27j)
+│   ├── Build_metrics_quantile_DtoD.py # tableau comparant Quantile (Q50) à son homologue DtoD, par % de masquage
+│   ├── Compare_to_insitu.py           # matching SWORD + métriques modèle vs in-situ (DtoD/Quantile)
+│   ├── Eval_Models_DtoD.py            # éval zero-shot des modèles DtoD (10j/27j)
+│   ├── Eval_quantile.py               # éval zero-shot des modèles Quantile (Q50 + métriques natives)
 │   ├── find_best_epochs.py            # compare plusieurs runs, identifie la meilleure époque
+│   ├── plot_outliers_quantile.py      # détection outlier hors [Q5,Q95] + plot bande d'incertitude (voir §16)
 │   └── Sword_connectivity.py          # graphe de connectivité fluviale SWORD (copie/récup auto)
 │
 ├── Exploring_results/
@@ -364,12 +367,19 @@ Chaque dossier contient `model_epoch{N}.pt` (poids du modèle), `optimizer_state
 
 ## 12. Évaluation
 
+Tous les résultats (CSV, graphiques, tableaux) rangés dans **`Evaluation_Model/`**. Modèles **Classic** abandonnés (plus utilisés) — seuls **DtoD** et **Quantile** restent d'actualité.
+
 | Script | Rôle |
 |---|---|
-| `Eval_Models_classic.py` | Évaluation zero-shot des modèles "Classic" (predict_last_n=1), 10j/27j |
-| `Compare_to_insitu.py` | Sélection in-situ par connectivité SWORD (pas juste distance) + calcul NSE/KGE/RMSE/R² modèle vs in-situ |
+| `Eval_Models_DtoD.py` | Évaluation zero-shot des modèles DtoD (`predict_last_n>1`), 10j/27j — pas de logique quantile |
+| `Eval_quantile.py` | Évaluation zero-shot des modèles Quantile — extrait Q50 + métriques natives (NSE/KGE), 10j/27j |
+| `Compare_to_insitu.py` | Sélection in-situ par connectivité SWORD (pas juste distance) + calcul NSE/KGE/RMSE/R² modèle vs in-situ — DtoD et Quantile |
+| `Build_metrics_quantile_DtoD.py` | Tableau comparant Quantile (Q50) à son homologue DtoD, par % de masquage |
 | `find_best_epochs.py` | Compare plusieurs runs entraînés, identifie la meilleure époque par métrique composite |
+| `plot_outliers_quantile.py` | Détection d'outliers (observation hors `[Q5,Q95]`) + plot avec bande d'incertitude — ⚠️ voir §16, dépendance manquante |
 | `Sword_connectivity.py` | Graphe de connectivité fluviale SWORD — récupère automatiquement le fichier `.gpkg` depuis le stockage interne au premier appel (`ensure_sword_file()`), rien à faire manuellement |
+
+**Ordre d'exécution typique** : `Eval_Models_DtoD.py` et/ou `Eval_quantile.py` → `Compare_to_insitu.py` → `Build_metrics_quantile_DtoD.py` (tableau) et/ou `plot_outliers_quantile.py` (graphiques par station).
 
 `Sword_connectivity.py` doit être dans le **même dossier** que les scripts qui l'importent (import direct, pas de manipulation de `sys.path`).
 
@@ -411,8 +421,8 @@ Principe commun : **une seule source de vérité par étape**, tous les sous-mod
 - **`step4_db_to_ncdf.py`** — un renommage complet (`dahiti` → `hydroweb` dans les variables/chemins internes) avait été préparé mais son application effective sur ce fichier n'est pas confirmée. À vérifier avant de s'y fier pour un usage prolongé.
 - **`step1_imporWaterDahiti.py`** — présent dans le repo, jamais discuté ; statut (legacy à supprimer, ou utilisé pour une vraie source DAHITI) à clarifier.
 - **`pipeline_finale.py`** — ancienne pipeline complète (historique), probablement supplantée par `PipelineStep0to4.py` ; à confirmer avant suppression éventuelle.
-- **Masquage pour HydroWeb Next** — `Create_dataset_masked.py` ne gère aujourd'hui que l'in-situ (`NeuralHydroDtoD0`). Un dataset équivalent pour HydroWeb Next (utilisé par les scripts d'évaluation `eval_dtod_quantile.py` sous le nom `NeuralHydrologyHWNextDtoD`) n'a pas encore été construit dans ce repo.
-- **Scripts d'évaluation avancés non encore intégrés** — `eval_dtod_quantile.py`, `build_dtod_metrics_table.py`, `plot_stations_per_year_daily.py`, `plot_stations_outliers_consensus.py` ont été adaptés en discussion mais ne figurent pas encore dans `Evaluation_Model/`.
+- **Masquage pour HydroWeb Next** — `Create_dataset_masked.py` ne gère aujourd'hui que l'in-situ (`NeuralHydroDtoD0`). Un dataset équivalent pour HydroWeb Next (`NeuralHydrologyHWNextDtoD`, attendu par `Eval_Models_DtoD.py` et `Eval_quantile.py`) n'a pas encore été construit dans ce repo — **ces deux scripts ne fonctionneront pas tant que ce dataset n'existe pas**.
+- **`plot_outliers_quantile.py` — dépendance manquante** : ce script lit des fichiers `residuals_*_bands.csv` (colonnes `pred_q05/q25/q50/q75/q95`) qu'**aucun script du dossier ne génère actuellement** — `Eval_quantile.py` n'extrait que Q50, pas les 5 quantiles. Sans ce fichier, le script tournera mais ne produira aucun graphique de bande d'incertitude (warning, pas de crash). Un script `eval_quantile_bands.py` (extraction des 5 quantiles) a été rédigé en discussion mais n'a pas été retenu dans la version finale du dossier — à ajouter si les bandes d'incertitude sont nécessaires.
 - **Notebooks cartographie** (`Plot_Stations_on_Map.ipynb`, `Carte_verif_sword.ipynb`) — patchés en discussion (chemins + schéma BDD) mais pas encore déposés dans `Exploring_results/`.
 - **Clés API en dur** (§1) — à sortir en variables d'environnement si le repo doit un jour être rendu public.
 - **`requirements.txt`** — versions non pinnées ; à figer si une reproductibilité stricte est nécessaire.
