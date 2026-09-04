@@ -1,0 +1,107 @@
+autoregressive_inputs:
+- water_level_shift1
+batch_size: 64
+cache_validation_data: true
+clip_gradient_norm: 0.8
+commit_hash: 74b6fb8
+data_dir: data/IA/NeuralHydroDtoD80
+dataset: generic
+device: cpu
+dynamic_inputs:
+- precipitation_J0
+- temperature_J0
+- pet_J0
+- precip_mean_J3
+- temp_mean_J3
+- pet_mean_J3
+- precip_mean_J10
+- temp_mean_J10
+- pet_mean_J10
+- precip_max_J10
+- precip_last7
+- nb_jours_pluie_J10
+- snow_depth_J0
+- snowmelt_J0
+- snow_depth_mean_J3
+- snowmelt_mean_J3
+- snow_depth_mean_J10
+- snowmelt_mean_J10
+- clim_mean_20j
+- clim_std_20j
+- doy_sin
+- doy_cos
+dynamics_embedding:
+  type: fc
+  hiddens:
+  - 30
+  - 20
+  activation: tanh
+  dropout: 0.2
+epochs: 30
+experiment_name: arlstm_DtoD80_quantile
+head: quantileregression
+hidden_size: 256
+img_log_dir: 
+  /home/sar_hydro/STUDIES/EtudesEB/PythonProject/runs/arlstm_DtoD80_quantile_3006_155128/img_log
+initial_forget_bias: 3
+lagged_features:
+  water_level:
+  - 1
+learning_rate:
+  0: 0.0008
+  12: 0.0004
+  20: 0.0002
+loss: MultiQuantileLoss
+max_updates_per_epoch: 1500
+metrics:
+- NSE
+- KGE
+- FHV
+model: arlstm
+num_workers: 4
+number_of_basins: 1000
+optimizer: AdamW
+output_dropout: 0.4
+package_version: 1.13.0
+predict_last_n:
+  1D: 1
+quantiles:
+- 0.05
+- 0.25
+- 0.5
+- 0.75
+- 0.95
+run_dir: 
+  /home/sar_hydro/STUDIES/EtudesEB/PythonProject/runs/arlstm_DtoD80_quantile_3006_155128
+save_validation_results: true
+seed: 374540
+seq_length:
+  1D: 365
+static_attributes:
+- aire_km2
+- lon
+- lat
+- frac_urban
+- frac_forest
+- frac_agriculture
+- sg_clay_0_30cm
+- sg_sand_0_30cm
+- sg_silt_0_30cm
+- strahler
+- elevation_mean
+- slope_mean
+target_noise_std: 0.01
+target_variables:
+- water_level
+train_basin_file: AI/LSTM/NeuralHydroDtoD80/train_basins.txt
+train_dir: 
+  /home/sar_hydro/STUDIES/EtudesEB/PythonProject/runs/arlstm_DtoD80_quantile_3006_155128/train_data
+train_end_date: 31/12/2025
+train_start_date: 01/01/2016
+use_frequencies:
+- 1D
+validate_every: 1
+validate_n_random_basins: 400
+validation_basin_file: AI/LSTM/NeuralHydroDtoD80/val_basins.txt
+validation_end_date: 31/12/2025
+validation_start_date: 01/01/2016

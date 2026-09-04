@@ -35,7 +35,7 @@ HW_COLLECTION_ID = "HYDROWEB_RIVERS_OPE"
 # Dossier où step0_fetch_hydroweb_next_raw.py extrait les .txt bruts —
 # c'est aussi le dossier que step1_importWaterLvL.py doit lire ensuite
 # (argument positionnel "dossier" de son CLI).
-HW_RAW_OUTPUT_DIR = "./data/Step1T/hydroweb_next"
+HW_RAW_OUTPUT_DIR = "./data/Step1/hydroweb_next"
 
 # BDD par défaut pour cette source (utilisé si tu ne précises pas --db)
 HW_DB_PATH = "./database/hydroweb_next_France.db"
@@ -43,7 +43,7 @@ HW_DB_PATH = "./database/hydroweb_next_France.db"
 # ─── In-situ SCHAPI ─────────────────────────────────────────────────────
 # Dossier où step0_fetch_insitu_raw.py copie les fichiers bruts depuis le
 # stockage interne — structure : {INSITU_RAW_DIR}/shp/ et {INSITU_RAW_DIR}/data/
-INSITU_RAW_DIR = "./data/Step1T"
+INSITU_RAW_DIR = "./data/Step1"
 INSITU_CSV_SUBDIR = "data"
 INSITU_SHP_SUBDIR = "shp"
 

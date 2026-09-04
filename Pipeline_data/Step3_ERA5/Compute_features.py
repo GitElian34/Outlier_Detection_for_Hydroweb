@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 ═══════════════════════════════════════════════════════════════════════════
-step3d_compute_features.py — Calcul des features pour measure_attributes
+Compute_features.py — Calcul des features pour measure_attributes
 ═══════════════════════════════════════════════════════════════════════════
 
 À partir de era5_bv_jour (quotidien), calcule pour chaque date de mesure
@@ -19,6 +19,22 @@ Features calculées :
 
 Fix v2 : gestion des doublons de dates (multi-mission DAHITI) —
   tous les measurement_id d'une même date reçoivent les mêmes attributs.
+
+⚠️ OPTIMISATION (fix v3) — cette étape était très lente sur l'in-situ
+(stations avec des milliers de mesures journalières sur 10 ans), pour 2
+raisons corrigées ici :
+
+  1. Insertion individuelle (SELECT dedup + INSERT par mesure) remplacée
+     par un batch executemany() par station, via insert_measure_attributes_batch
+     (même principe que l'optimisation déjà faite sur step3c_era5_snow.py).
+
+  2. La climatologie fenêtrée ±20j était recalculée en boucle Python avec
+     df.loc[mask, ...] (pandas) POUR CHAQUE DATE DE MESURE — chaque appel
+     .loc a un coût fixe important, répété des milliers de fois par
+     station in-situ. Remplacé par un calcul vectorisé en numpy pur
+     (tableaux bruts, pas de pandas dans la boucle), fait UNE SEULE FOIS
+     par station sur toute sa série, avant la boucle sur les dates de
+     mesure — celles-ci ne font plus qu'un lookup, pas un recalcul.
 ═══════════════════════════════════════════════════════════════════════════
 """
 
@@ -30,6 +46,54 @@ import numpy as np
 import pandas as pd
 
 log = logging.getLogger("step3d")
+
+
+# ═══════════════════════════════════════════════════════════════
+# CLIMATOLOGIE FENÊTRÉE ±20j — VECTORISÉE (numpy pur, calculée une
+# seule fois par station sur toute la série, pas par date de mesure)
+# ═══════════════════════════════════════════════════════════════
+def compute_precip_clim_vectorized(df: pd.DataFrame, window: int = 20) -> tuple:
+    """
+    Calcule clim_mean/clim_std (climatologie de precip_sum_bv, ±window
+    jours, leave-one-year-out) pour CHAQUE date de df.index, en une seule
+    passe vectorisée numpy — au lieu d'un recalcul pandas .loc par date
+    de mesure (l'ancien goulot d'étranglement).
+
+    Returns:
+        (clim_mean: np.ndarray, clim_std: np.ndarray), alignés sur df.index
+    """
+    precip = df["precip_sum_bv"].values.astype(float)
+    doys = np.clip(df.index.dayofyear.values, 1, 365)
+    years = df.index.year.values
+    n = len(df)
+
+    clim_mean = np.zeros(n, dtype=np.float64)
+    clim_std = np.ones(n, dtype=np.float64)
+
+    valid_mask = ~np.isnan(precip)
+    valid_doys = doys[valid_mask]
+    valid_years = years[valid_mask]
+    valid_vals = precip[valid_mask]
+
+    if len(valid_vals) < 30:
+        # Pas assez de données pour une climatologie fiable — comportement
+        # identique à l'ancienne fonction (defaults 0.0/1.0 partout)
+        return clim_mean, clim_std
+
+    for i in range(n):
+        doy_diff = np.abs(valid_doys - doys[i])
+        doy_diff = np.minimum(doy_diff, 365 - doy_diff)
+        mask = (doy_diff <= window) & (valid_years != years[i])
+        vals = valid_vals[mask]
+        if len(vals) >= 3:
+            clim_mean[i] = vals.mean()
+            s = vals.std()
+            clim_std[i] = s if s > 0.01 else 1.0
+        else:
+            clim_mean[i] = 0.0
+            clim_std[i] = 1.0
+
+    return clim_mean, clim_std
 
 
 def compute_rolling_features(era5_df: pd.DataFrame, measure_dates: list[str]) -> list[dict]:
@@ -49,7 +113,8 @@ def compute_rolling_features(era5_df: pd.DataFrame, measure_dates: list[str]) ->
     df = era5_df.copy()
     df = df.sort_values("date").set_index("date")
 
-    # Pré-calculer les rolling means sur toute la série
+    # Pré-calculer les rolling means sur toute la série (déjà vectorisé,
+    # inchangé)
     df["precip_J3"]    = df["precip_sum_bv"].rolling(3,  min_periods=1).mean()
     df["pet_J3"]       = df["pet_sum_bv"].rolling(3,     min_periods=1).mean()
     df["temp_J3"]      = df["temp_moy_bv"].rolling(3,    min_periods=1).mean()
@@ -60,6 +125,14 @@ def compute_rolling_features(era5_df: pd.DataFrame, measure_dates: list[str]) ->
     df["precip_max27"] = df["precip_sum_bv"].rolling(27, min_periods=1).max()
     df["doy"]          = df.index.dayofyear
 
+    # Climatologie vectorisée — calculée UNE FOIS pour toute la série,
+    # puis simple lookup par date dans la boucle ci-dessous (au lieu
+    # d'un recalcul pandas .loc à chaque date de mesure).
+    clim_mean_arr, clim_std_arr = compute_precip_clim_vectorized(df)
+    clim_series = pd.DataFrame(
+        {"clim_mean": clim_mean_arr, "clim_std": clim_std_arr}, index=df.index
+    )
+
     results = []
     for date_str in measure_dates:
         date = pd.Timestamp(date_str)
@@ -67,24 +140,7 @@ def compute_rolling_features(era5_df: pd.DataFrame, measure_dates: list[str]) ->
             continue
 
         row = df.loc[date]
-
-        # Climatologie fenêtrée ±20j (leave-one-year-out)
-        doy     = date.dayofyear
-        year    = date.year
-        doy_min = doy - 20
-        doy_max = doy + 20
-
-        if doy_min < 1:
-            mask_doy = (df["doy"] >= (365 + doy_min)) | (df["doy"] <= doy_max)
-        elif doy_max > 365:
-            mask_doy = (df["doy"] >= doy_min) | (df["doy"] <= (doy_max - 365))
-        else:
-            mask_doy = (df["doy"] >= doy_min) & (df["doy"] <= doy_max)
-
-        mask_year  = df.index.year != year
-        clim_data  = df.loc[mask_doy & mask_year, "precip_sum_bv"]
-        clim_mean  = float(clim_data.mean()) if len(clim_data) >= 3 else 0.0
-        clim_std   = float(clim_data.std())  if len(clim_data) >= 3 else 1.0
+        clim_row = clim_series.loc[date]
 
         features = {
             "precipitation_J0": _round(row.get("precip_sum_bv")),
@@ -96,8 +152,8 @@ def compute_rolling_features(era5_df: pd.DataFrame, measure_dates: list[str]) ->
             "precip_mean_J10" : _round(row.get("precip_J10")),
             "temp_mean_J10"   : _round(row.get("temp_J10")),
             "precip_mean_J27" : _round(row.get("precip_J27")),
-            "clim_mean_20j"   : _round(clim_mean),
-            "clim_std_20j"    : _round(clim_std),
+            "clim_mean_20j"   : _round(clim_row.get("clim_mean")),
+            "clim_std_20j"    : _round(clim_row.get("clim_std")),
             "precip_max_J27"  : _round(row.get("precip_max27")),
             "precip_last7"    : _round(row.get("precip_last7")),
         }
@@ -121,6 +177,9 @@ def run_step3d(conn: sqlite3.Connection) -> dict:
     Fix v2 : gère les doublons de dates (multi-mission) — tous les
     measurement_id d'une même date reçoivent les mêmes attributs Step3_ERA5.
 
+    Fix v3 (optimisation) : insertion en batch par station (executemany)
+    au lieu d'un insert individuel par mesure, + climatologie vectorisée.
+
     Returns:
         {"stations": n, "measures_filled": n, "errors": n}
     """
@@ -128,7 +187,7 @@ def run_step3d(conn: sqlite3.Connection) -> dict:
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
     from Pipeline_data.Database.db_operations import (
         get_all_station_codes, get_era5_bv_jour,
-        get_measurement_dates, insert_measure_attributes,
+        get_measurement_dates, insert_measure_attributes_batch,
     )
 
     station_codes = get_all_station_codes(conn)
@@ -164,13 +223,24 @@ def run_step3d(conn: sqlite3.Connection) -> dict:
                 ORDER BY m.measure_date
             """, (code,)).fetchall()
 
+            # Accumulation en batch — UN SEUL executemany() pour toute
+            # la station, au lieu d'un insert individuel par mesure.
+            batch_rows = []
             for measurement_id, date_str in rows:
                 feat = features_by_date.get(date_str)
                 if feat is None:
                     continue
                 f = {k: v for k, v in feat.items() if k != "date"}
-                insert_measure_attributes(conn, measurement_id, code, date_str, f)
-                total_filled += 1
+                batch_rows.append({
+                    "measurement_id": measurement_id,
+                    "station_code": code,
+                    "measure_date": date_str,
+                    **f,
+                })
+
+            if batch_rows:
+                n = insert_measure_attributes_batch(conn, batch_rows)
+                total_filled += n
 
         except Exception as e:
             log.error(f"  {code} — ERREUR : {e}")

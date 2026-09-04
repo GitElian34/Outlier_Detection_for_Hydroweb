@@ -14,10 +14,18 @@ choisi (NeuralHydroDtoD{pct}), donc pas besoin de le préciser à la main.
 
 Ne modifie JAMAIS le dataset source.
 
+⚠️ AJOUT — micro-test (--n-train / --n-val) :
+    Si précisés, tronque train_basins.txt/val_basins.txt aux N premières
+    stations, et ne masque QUE les .nc de ces stations (au lieu de tout
+    le dataset) — pratique pour vérifier rapidement que toute la chaîne
+    fonctionne (ex: --n-train 10 --n-val 1) avant un run complet. Sans
+    ces paramètres (défaut), comportement inchangé : tout le dataset.
+
 Usage :
     python create_dataset_masked.py --pct 96
     python create_dataset_masked.py --pct 50 --seed 123
     python create_dataset_masked.py --pct 80 --src-dir ./data/IA/NeuralHydroDtoD0
+    python create_dataset_masked.py --pct 96 --n-train 10 --n-val 1   (micro-test)
 ═══════════════════════════════════════════════════════════════════════════
 """
 
@@ -46,6 +54,19 @@ DEFAULT_BASINS_DST_ROOT = Path("./AI/LSTM")
 DEFAULT_SEED = 42
 
 
+def _copy_basins_file(src_path: Path, dst_path: Path, n_limit: int | None) -> list[str]:
+    """
+    Copie un fichier basins (train ou val), tronqué aux n_limit premières
+    lignes si précisé. Retourne la liste des station_id effectivement
+    écrites (utile pour filtrer les .nc à masquer en mode micro-test).
+    """
+    lines = [l.strip() for l in src_path.read_text().splitlines() if l.strip()]
+    if n_limit is not None:
+        lines = lines[:n_limit]
+    dst_path.write_text("\n".join(lines))
+    return lines
+
+
 def create_masked_dataset(
     pct: int,
     src_dir: Path = DEFAULT_SRC_DIR,
@@ -53,6 +74,8 @@ def create_masked_dataset(
     basins_src_dir: Path = DEFAULT_BASINS_SRC_DIR,
     basins_dst_root: Path = DEFAULT_BASINS_DST_ROOT,
     seed: int = DEFAULT_SEED,
+    n_train: int | None = None,
+    n_val: int | None = None,
 ) -> dict:
     """
     Crée un dataset masqué à `pct`% depuis un dataset source complet.
@@ -65,6 +88,9 @@ def create_masked_dataset(
         basins_src_dir: dossier source des train/val_basins.txt
         basins_dst_root: dossier racine où créer les basins du dataset masqué
         seed: graine aléatoire (reproductibilité du masquage)
+        n_train: si précisé, ne garde que les n_train premières stations
+                 de train_basins.txt (micro-test). None = toutes.
+        n_val: idem pour val_basins.txt. None = toutes.
 
     Returns:
         {"dst_dir": Path, "n_ok": int, "n_skip": int}
@@ -73,6 +99,7 @@ def create_masked_dataset(
         raise ValueError(f"pct doit être entre 0 et 100 (reçu: {pct})")
 
     nan_rate = pct / 100.0
+    micro_test = n_train is not None or n_val is not None
 
     # ── Noms de dossiers déduits automatiquement du %  ──────────────
     dst_dir = dst_root / f"NeuralHydroDtoD{pct}"
@@ -84,20 +111,57 @@ def create_masked_dataset(
     dst_ts.mkdir(parents=True, exist_ok=True)
     dst_att.mkdir(parents=True, exist_ok=True)
 
-    # ── Copie attributes + basins (identiques à la source) ─────────
+    if micro_test:
+        log.info(f"⚠️  MODE MICRO-TEST : n_train={n_train}, n_val={n_val}")
+
+    # ── Copie attributes (inchangé, fichier unique attributes.csv — reste
+    # complet même en micro-test, NeuralHydrology ignore les stations
+    # absentes des basins files, pas besoin de le filtrer) ─────────
     log.info("Copie attributes...")
     for f in src_att.glob("*"):
         shutil.copy2(f, dst_att / f.name)
         log.info(f"  {f.name}")
 
+    # ── Copie basins (tronquée si micro-test) ───────────────────────
     dst_basins_dir.mkdir(parents=True, exist_ok=True)
+    selected_stations: set[str] = set()
+
+    train_src = Path(basins_src_dir) / "train_basins.txt"
+    val_src = Path(basins_src_dir) / "val_basins.txt"
+
+    if train_src.exists():
+        ids = _copy_basins_file(train_src, dst_basins_dir / "train_basins.txt", n_train)
+        selected_stations.update(ids)
+        log.info(f"  basins : train_basins.txt ({len(ids)} stations"
+                 f"{' — tronqué' if n_train is not None else ''})")
+
+    if val_src.exists():
+        ids = _copy_basins_file(val_src, dst_basins_dir / "val_basins.txt", n_val)
+        selected_stations.update(ids)
+        log.info(f"  basins : val_basins.txt ({len(ids)} stations"
+                 f"{' — tronqué' if n_val is not None else ''})")
+
+    # Autres fichiers basins éventuels (copiés tels quels, non concernés
+    # par le micro-test — seuls train/val sont utilisés par NeuralHydrology
+    # pour sélectionner les stations)
     for f in Path(basins_src_dir).glob("*.txt"):
+        if f.name in ("train_basins.txt", "val_basins.txt"):
+            continue
         shutil.copy2(f, dst_basins_dir / f.name)
         log.info(f"  basins : {f.name}")
 
     # ── Masquage ──────────────────────────────────────────────────
     nc_files = sorted(src_ts.glob("*.nc"))
-    log.info(f"{len(nc_files)} fichiers .nc à traiter (masquage {pct}%)")
+
+    if micro_test:
+        # Ne masquer QUE les .nc des stations retenues (gain de temps
+        # en plus, pas juste une histoire de train/val) — pas la peine
+        # de scanner tout le dataset pour un micro-test.
+        nc_files = [f for f in nc_files if f.stem in selected_stations]
+        log.info(f"{len(nc_files)} fichiers .nc à traiter (micro-test, "
+                 f"masquage {pct}%)")
+    else:
+        log.info(f"{len(nc_files)} fichiers .nc à traiter (masquage {pct}%)")
 
     rng = np.random.default_rng(seed)
     n_ok = n_skip = 0
@@ -140,6 +204,9 @@ def create_masked_dataset(
     log.info("=" * 55)
     log.info(f"  Dataset     : {dst_dir}")
     log.info(f"  Masquage    : {pct}% des valeurs non-NaN")
+    if micro_test:
+        log.info(f"  Micro-test  : {len(selected_stations)} stations "
+                 f"(train={n_train}, val={n_val})")
     log.info(f"  .nc générés : {n_ok}")
     log.info(f"  .nc skippés : {n_skip}")
     log.info("=" * 55)
@@ -167,6 +234,7 @@ Exemples :
   python create_dataset_masked.py --pct 96
   python create_dataset_masked.py --pct 50 --seed 123
   python create_dataset_masked.py --pct 80 --src-dir ./data/IA/NeuralHydroDtoD0
+  python create_dataset_masked.py --pct 96 --n-train 10 --n-val 1   (micro-test)
         """,
     )
     parser.add_argument("--pct", type=int, required=True,
@@ -181,6 +249,10 @@ Exemples :
                         help=f"Dossier racine de sortie des basins (défaut: {DEFAULT_BASINS_DST_ROOT})")
     parser.add_argument("--seed", type=int, default=DEFAULT_SEED,
                         help=f"Graine aléatoire (défaut: {DEFAULT_SEED})")
+    parser.add_argument("--n-train", type=int, default=None,
+                        help="Micro-test : limite le nombre de stations train (défaut: toutes)")
+    parser.add_argument("--n-val", type=int, default=None,
+                        help="Micro-test : limite le nombre de stations val (défaut: toutes)")
     args = parser.parse_args()
 
     create_masked_dataset(
@@ -190,4 +262,6 @@ Exemples :
         basins_src_dir=Path(args.basins_src_dir),
         basins_dst_root=Path(args.basins_dst_root),
         seed=args.seed,
+        n_train=args.n_train,
+        n_val=args.n_val,
     )

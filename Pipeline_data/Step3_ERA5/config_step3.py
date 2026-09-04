@@ -87,8 +87,8 @@ def get_bbox_from_bv(conn, margin_deg: float = BBOX_MARGIN_DEG) -> list[float]:
     return bbox
 
 # ─── Chemins ────────────────────────────────────────────────────────────
-RAW_DATA_DIR = "./data/Step3T/raw_data/"
-USABLE_DATA_DIR = "./data/Step3T/usable_data_LAND_France/"
+RAW_DATA_DIR = "./data/Step3/raw_data/"
+USABLE_DATA_DIR = "./data/Step3/usable_data_LAND_France/"
 
 # ─── Nettoyage ──────────────────────────────────────────────────────────
 KEEP_RAW_PIECES = False  # supprimer les fichiers intermédiaires après fusion
