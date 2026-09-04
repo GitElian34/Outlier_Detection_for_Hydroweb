@@ -1,0 +1,45 @@
+# ═══════════════════════════════════════════════════════════════════════
+# requirements.txt — Outlier_Detection_DL
+# ═══════════════════════════════════════════════════════════════════════
+# Installation :
+#   pip install -r requirements.txt --break-system-packages
+# (ou dans un venv, sans --break-system-packages — voir setup.sh)
+#
+# ⚠️ Prérequis SYSTÈME (pas installables via pip) :
+#   - GDAL CLI (gdaldem, utilisé par step2c_elevation_slope.py)
+#       Ubuntu/Debian : sudo apt install gdal-bin
+#   - Compilateur C (pour certaines dépendances géo type pysheds/rasterio
+#     si les wheels précompilés ne sont pas dispo pour ta plateforme)
+# ═══════════════════════════════════════════════════════════════════════
+
+# ─── Data / calcul général ───────────────────────────────────────────────
+numpy
+pandas
+scipy
+
+# ─── Géospatial ──────────────────────────────────────────────────────────
+geopandas
+shapely
+rasterio
+rasterstats
+pysheds
+pyproj
+owslib
+
+# ─── NetCDF / climat ─────────────────────────────────────────────────────
+xarray
+netCDF4
+
+# ─── APIs externes ────────────────────────────────────────────────────────
+requests
+py_hydroweb
+cdsapi
+
+# ─── Deep learning (entraînement NeuralHydrology) ────────────────────────
+torch
+tqdm
+
+# ─── NeuralHydrology ──────────────────────────────────────────────────────
+# Installé séparément en mode éditable depuis la copie locale modifiée
+# (voir setup.sh) — PAS depuis PyPI, pour que tes modifications du
+# framework soient prises en compte. Ne pas ajouter "neuralhydrology" ici.
