@@ -1,4 +1,4 @@
-# Outlier_Detection_DL
+[# Outlier_Detection_DL
 
 Pipeline complet de détection d'anomalies sur des séries de niveau d'eau, combinant :
 - **Altimétrie satellite** (HydroWeb Next) et **mesures in-situ** (réseau SCHAPI),
@@ -401,3 +401,4 @@ Principe commun : **une seule source de vérité par étape**, tous les sous-mod
 - **Notebooks cartographie** (`Plot_Stations_on_Map.ipynb`, `Carte_verif_sword.ipynb`) — patchés en discussion (chemins + schéma BDD) mais pas encore déposés dans `Exploring_results/`.
 - **Clés API en dur** (§1) — à sortir en variables d'environnement si le repo doit un jour être rendu public.
 - **`requirements.txt`** — versions non pinnées ; à figer si une reproductibilité stricte est nécessaire.
+](https://github.com/GitElian34/Outlier_Detection_for_Hydroweb)
