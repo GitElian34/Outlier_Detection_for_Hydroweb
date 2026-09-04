@@ -27,11 +27,11 @@ proportionnelle à l'incertitude réelle du modèle. Insitu garde son
 propre z-score (référentiel différent).
 
 Source (fichiers "_bands", produits par eval_quantile_bands.py) :
-  Models_Testing/Quantille/residus/residuals_Quantile{80,90,96}_{SOURCE}_{freq}_bands.csv
+  Evaluation_Model/Quantille/residus/residuals_Quantile{80,90,96}_{SOURCE}_{freq}_bands.csv
   colonnes : station, date, obs, pred_q05, pred_q25, pred_q50, pred_q75, pred_q95
 
 Sorties :
-  Models_Testing/Quantille/plots/outliers_bands/{SOURCE}/{freq}/{station}/{year}.png
+  Evaluation_Model/Quantille/plots/outliers_bands/{SOURCE}/{freq}/{station}/{year}.png
 ════════════════════════════════════════════════════════════════════════
 """
 
@@ -54,8 +54,8 @@ RANDOM_SEED = 42
 
 WINDOW_DAYS = {"10j": 5, "27j": 14}  # tolérance de recalage insitu (affichage seulement)
 
-RESIDUS_DIR = Path("./Models_Testing/Quantille/residus")
-PLOT_DIR = Path("./Models_Testing/Quantille/plots/outliers_bands")
+RESIDUS_DIR = Path("./Evaluation_Model/residus")
+PLOT_DIR = Path("./Evaluation_Model/Quantille/plots/outliers_bands")
 INSITU_DB = "./data/insitu_data.db"
 DATE_MIN, DATE_MAX = "2016-01-01", "2025-12-31"
 
@@ -84,11 +84,18 @@ _cache_ins = {}
 
 
 def get_insitu_series(code_sta):
+    """
+    Série in-situ brute — schéma unifié (measurements/orthometric_height),
+    au lieu de l'ancien mesures_insitu/h_med_wsh.
+    """
     if code_sta not in _cache_ins:
         conn = sqlite3.connect(INSITU_DB)
         df = pd.read_sql("""
-            SELECT date, h_med_wsh AS wl FROM mesures_insitu
-            WHERE code_sta = ? AND date >= ? AND date <= ? ORDER BY date
+            SELECT measure_date AS date, orthometric_height AS wl
+            FROM measurements
+            WHERE station_code = ? AND is_valid = 1
+              AND measure_date >= ? AND measure_date <= ?
+            ORDER BY measure_date
         """, conn, params=(code_sta, DATE_MIN, DATE_MAX))
         conn.close()
         df["date"] = pd.to_datetime(df["date"])

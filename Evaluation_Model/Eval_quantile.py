@@ -15,7 +15,7 @@ supposaient à tort.
 Ne touche pas au pipeline existant (eval_dtod_quantile.py) -- écrit un
 fichier séparé, suffixé "_bands", pour ne rien écraser :
 
-    Models_Testing/Quantille/residus/residuals_{label}_{SOURCE}_{freq}_bands.csv
+    Evaluation_Model/Quantille/residus/residuals_{label}_{SOURCE}_{freq}_bands.csv
     colonnes : station, date, obs, pred_q05, pred_q25, pred_q50, pred_q75, pred_q95
 
 Usage :
@@ -80,7 +80,7 @@ MODELS = [
 FREQS = ["10j", "27j"]
 GAP_RANGES = {"10j": (7, 15), "27j": (22, 32)}
 
-OUT_DIR = Path("./Models_Testing/Quantille/residus")
+OUT_DIR = Path("./Evaluation_Model/Quantille/residus")
 
 
 # ═══════════════════════════════════════════════════════════════

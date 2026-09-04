@@ -20,16 +20,16 @@ schéma (mesures_insitu/h_med_wsh) :
   - HW_DB / INSITU_DB : chemins par défaut alignés sur config_step1.py.
 
 Entrées :
-  - ./Models_Testing/Residus/residuals_10j_hwnext.csv
-  - ./Models_Testing/Residus/residuals_27j_hwnext.csv
+  - ./Evaluation_Model/Residus/residuals_10j_hwnext.csv
+  - ./Evaluation_Model/Residus/residuals_27j_hwnext.csv
   - HW_DB      (coords des stations alti, table stations)
   - INSITU_DB  (séries insitu, table measurements — schéma unifié)
   - INSITU_SHP (positions insitu, GeoPackage)
   - Sword_connectivity.py (load_sword_reaches, build_graph, check_connectivity)
 
 Sorties (par fréquence) :
-  ./Models_Testing/Residus/metrics_10j_hwnext_sword_insitu.csv
-  ./Models_Testing/Residus/metrics_27j_hwnext_sword_insitu.csv
+  ./Evaluation_Model/Residus/metrics_10j_hwnext_sword_insitu.csv
+  ./Evaluation_Model/Residus/metrics_27j_hwnext_sword_insitu.csv
 
 Métriques calculées (modèle vs insitu, sur données z-scorées par station,
 KGE SANS terme beta -> évite l'explosion sur mean~0) :
@@ -61,7 +61,7 @@ from Sword_connectivity import load_sword_reaches, build_graph, check_connectivi
 # ═══════════════════════════════════════════════════════════════
 # PARAMÈTRES
 # ═══════════════════════════════════════════════════════════════
-RESIDUALS_DIR = Path("./Models_Testing/Residus")
+RESIDUALS_DIR = Path("./Evaluation_Model/Residus")
 
 RUNS = [
     {"freq": "10j", "residuals_csv": RESIDUALS_DIR / "residuals_10j_hwnext_recale.csv", "window_days": 5},

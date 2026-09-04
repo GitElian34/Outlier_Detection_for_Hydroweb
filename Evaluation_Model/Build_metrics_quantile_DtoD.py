@@ -17,8 +17,8 @@ sur le calcul du gain modèle vs alti-insitu -- même principe ici).
 Lit DIRECTEMENT les fichiers par-station produits par
 compare_other_models_vs_insitu.py :
 
-    Models_Testing/DtoD/residus/metrics_DtoD{80,90,96}_{SOURCE}_{freq}_sword_insitu.csv
-    Models_Testing/Quantille/residus/metrics_Quantile{80,90,96}_{SOURCE}_{freq}_sword_insitu.csv
+    Evaluation_Model/DtoD/residus/metrics_DtoD{80,90,96}_{SOURCE}_{freq}_sword_insitu.csv
+    Evaluation_Model/Quantille/residus/metrics_Quantile{80,90,96}_{SOURCE}_{freq}_sword_insitu.csv
 
 Colonnes attendues (une ligne par station, mêmes deux fichiers) :
     station, insitu_code, dist_insitu_km, connectivity_validated, n_pairs,
@@ -30,7 +30,7 @@ disponible depuis ces fichiers) -- reste comparable entre stations car
 le z-score normalise déjà l'échelle.
 
 Sortie (PNG haute résolution) :
-    Models_Testing/DtoD/figures/table_quantile_vs_dtod_{SOURCE}.png
+    Evaluation_Model/DtoD/figures/table_quantile_vs_dtod_{SOURCE}.png
     + CSV équivalent
 ════════════════════════════════════════════════════════════════════════
 """
@@ -40,9 +40,9 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 from pathlib import Path
 
-DTOD_DIR = Path("./Models_Testing/DtoD/residus")
-QUANTILE_DIR = Path("./Models_Testing/Quantille/residus")
-OUT_DIR = Path("./Models_Testing/DtoD/figures")
+DTOD_DIR = Path("./Evaluation_Model/DtoD/residus")
+QUANTILE_DIR = Path("./Evaluation_Model/Quantille/residus")
+OUT_DIR = Path("./Evaluation_Model/DtoD/figures")
 
 SOURCE = "hwnext"   # <-- changer ici pour basculer hwnext <-> dahiti, doit
                     #     matcher SOURCE dans les autres scripts
