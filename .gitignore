@@ -1,2 +1,5 @@
-data/
-database/
+# data/ et database/ : dossiers gardés dans le repo (vides), contenu ignoré
+data/*
+!data/.gitkeep
+database/*
+!database/.gitkeep
