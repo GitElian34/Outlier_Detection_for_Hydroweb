@@ -51,6 +51,21 @@ source .venv/bin/activate
 ### Clés API
 `HYDROWEB_API_KEY` (py_hydroweb) et `CDSAPI_KEY`/`CDSAPI_URL` (Copernicus CDS, pour ERA5) sont actuellement **codées en dur** dans les scripts concernés (`Step0_DownloadData/data_step1/`, `Step3_ERA5/getData_ERA5_Land.py` et `Get_Data_ERA5_Land_Snow.py`) — décision actée pour la simplicité, à garder en tête si le repo devient public.
 
+### ⚠️ Réseau interne obligatoire pour plusieurs sources de données
+Une partie des chemins sources sont **codés en dur vers le stockage interne de la boîte** (chemins `/home/sar_hydro/...`, `/data/sar_hydro/...`) — ces scripts ne fonctionnent **que depuis la ferme** (ou une machine avec accès à ce stockage). Hors de ce réseau, ils échouent avec une erreur claire (`FileNotFoundError`), pas un plantage silencieux.
+
+Sources concernées (toutes dans l'étape 0, sauf SWORD) :
+| Source | Script | Chemin interne |
+|---|---|---|
+| In-situ (CSV + GeoPackage) | `step0_fetch_insitu_raw.py` | `/data/sar_hydro/dad/insitu/FULL_SCHAPI/` |
+| RiverATLAS | `step0_fetch_river_atlas.py` | `/home/sar_hydro/.../data/Step2/River_Atlas/` |
+| SRTM + Corine | `step0_fetch_step2_rasters.py` | `/home/sar_hydro/.../data/Step2/{SRTM,Corine}/` |
+| ROE (barrages) | `step0_fetch_roe.py` | `/home/sar_hydro/.../data/Step2/Barrage/` |
+| ERA5 (copie, méthode V2) | `Step0_DownloadData/data_step3/` | `/home/sar_hydro/.../data/Step2/ERA_5/` |
+| SWORD (connectivité) | `Sword_connectivity.py` | `/home/sar_hydro/.../data/Step2/Sword/` |
+
+Les autres sources de l'étape 0 (HydroWeb Next, HydroSHEDS, SoilGrids) sont de vrais téléchargements publics — elles fonctionnent depuis n'importe où avec un accès internet normal.
+
 ---
 
 ## 2. Structure du repo
