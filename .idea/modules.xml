@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/Outlier_Detection_DL.iml" filepath="$PROJECT_DIR$/.idea/Outlier_Detection_DL.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/neuralhydrology.iml" filepath="$PROJECT_DIR$/.idea/neuralhydrology.iml" />
     </modules>
   </component>
 </project>

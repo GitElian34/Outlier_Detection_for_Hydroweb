@@ -21,6 +21,16 @@ Ne modifie JAMAIS le dataset source.
     fonctionne (ex: --n-train 10 --n-val 1) avant un run complet. Sans
     ces paramètres (défaut), comportement inchangé : tout le dataset.
 
+⚠️ AJOUT — génération automatique du split train/val :
+    L'étape 4 in-situ ne fait aucun split train/val, elle écrit juste
+    une liste unique de stations (stations_insitu.txt). Si
+    train_basins.txt/val_basins.txt n'existent pas encore dans
+    basins_src_dir (ex: ./AI/LSTM/NeuralHydroDtoD0/), ce script les
+    génère maintenant lui-même (split aléatoire, seed fixe) à partir de
+    stations_insitu.txt trouvé dans src_dir — plus besoin de lancer un
+    script séparé avant le premier masquage. Voir --train-val-ratio /
+    --stations-txt pour ajuster.
+
 Usage :
     python create_dataset_masked.py --pct 96
     python create_dataset_masked.py --pct 50 --seed 123
@@ -31,6 +41,7 @@ Usage :
 
 import argparse
 import logging
+import random
 import shutil
 from pathlib import Path
 
@@ -52,6 +63,67 @@ DEFAULT_DST_ROOT = Path("./data/IA")
 DEFAULT_BASINS_SRC_DIR = Path("./AI/LSTM/NeuralHydroDtoD0")
 DEFAULT_BASINS_DST_ROOT = Path("./AI/LSTM")
 DEFAULT_SEED = 42
+DEFAULT_TRAIN_VAL_RATIO = 0.8   # 80% train / 20% val
+DEFAULT_STATIONS_TXT_NAME = "stations_insitu.txt"
+
+
+def _ensure_basins_exist(
+    basins_src_dir: Path,
+    stations_txt: Path,
+    ratio: float,
+    seed: int,
+) -> None:
+    """
+    Génère train_basins.txt/val_basins.txt dans basins_src_dir s'ils
+    n'existent pas déjà, en splittant aléatoirement (seed fixe, tirage
+    reproductible) la liste de stations trouvée dans stations_txt
+    (ex: stations_insitu.txt écrit par l'étape 4 in-situ).
+
+    Ne fait rien si les deux fichiers existent déjà (pas d'écrasement
+    d'un split existant).
+    """
+    train_path = basins_src_dir / "train_basins.txt"
+    val_path = basins_src_dir / "val_basins.txt"
+
+    if train_path.exists() and val_path.exists():
+        return
+
+    if not stations_txt.exists():
+        log.warning(
+            f"  ⚠ train_basins.txt/val_basins.txt absents de {basins_src_dir} "
+            f"et impossible de les générer : {stations_txt} introuvable. "
+            f"Le dataset masqué n'aura pas de basins tant que l'un des deux "
+            f"n'existe pas."
+        )
+        return
+
+    log.info(
+        f"  train_basins.txt/val_basins.txt absents de {basins_src_dir} "
+        f"→ génération automatique depuis {stations_txt} "
+        f"(ratio train={ratio}, seed={seed})"
+    )
+
+    stations = [l.strip() for l in stations_txt.read_text().splitlines() if l.strip()]
+    if not stations:
+        log.warning(f"  ⚠ {stations_txt} est vide — rien à splitter")
+        return
+
+    rng = random.Random(seed)
+    shuffled = stations[:]
+    rng.shuffle(shuffled)
+
+    n_train = round(len(shuffled) * ratio)
+    train_ids = sorted(shuffled[:n_train])
+    val_ids = sorted(shuffled[n_train:])
+
+    basins_src_dir.mkdir(parents=True, exist_ok=True)
+    train_path.write_text("\n".join(train_ids))
+    val_path.write_text("\n".join(val_ids))
+
+    log.info(
+        f"  → train_basins.txt ({len(train_ids)} stations) / "
+        f"val_basins.txt ({len(val_ids)} stations) créés dans {basins_src_dir}"
+    )
 
 
 def _copy_basins_file(src_path: Path, dst_path: Path, n_limit: int | None) -> list[str]:
@@ -76,6 +148,8 @@ def create_masked_dataset(
     seed: int = DEFAULT_SEED,
     n_train: int | None = None,
     n_val: int | None = None,
+    train_val_ratio: float = DEFAULT_TRAIN_VAL_RATIO,
+    stations_txt: Path | None = None,
 ) -> dict:
     """
     Crée un dataset masqué à `pct`% depuis un dataset source complet.
@@ -85,12 +159,20 @@ def create_masked_dataset(
              dossier de sortie est déduit automatiquement : NeuralHydroDtoD{pct}
         src_dir: dataset source (complet, référence)
         dst_root: dossier racine où créer NeuralHydroDtoD{pct}/
-        basins_src_dir: dossier source des train/val_basins.txt
+        basins_src_dir: dossier source des train/val_basins.txt — généré
+             automatiquement s'il n'existe pas encore (voir stations_txt)
         basins_dst_root: dossier racine où créer les basins du dataset masqué
-        seed: graine aléatoire (reproductibilité du masquage)
+        seed: graine aléatoire (reproductibilité du masquage ET du split
+              train/val si celui-ci doit être généré)
         n_train: si précisé, ne garde que les n_train premières stations
                  de train_basins.txt (micro-test). None = toutes.
         n_val: idem pour val_basins.txt. None = toutes.
+        train_val_ratio: proportion train du split auto-généré si
+             train_basins.txt/val_basins.txt n'existent pas encore
+             (défaut: 0.8, soit 80% train / 20% val)
+        stations_txt: fichier listant toutes les stations, utilisé pour
+             générer le split train/val si besoin (défaut:
+             src_dir / "stations_insitu.txt")
 
     Returns:
         {"dst_dir": Path, "n_ok": int, "n_skip": int}
@@ -121,6 +203,17 @@ def create_masked_dataset(
     for f in src_att.glob("*"):
         shutil.copy2(f, dst_att / f.name)
         log.info(f"  {f.name}")
+
+    # ── Génère train/val_basins.txt dans basins_src_dir s'ils n'existent
+    # pas encore (split auto depuis stations_txt, ex: stations_insitu.txt
+    # écrit par l'étape 4 in-situ) — ne fait rien si déjà présents ──────
+    _ensure_basins_exist(
+        basins_src_dir=Path(basins_src_dir),
+        stations_txt=Path(stations_txt) if stations_txt is not None
+                     else Path(src_dir) / DEFAULT_STATIONS_TXT_NAME,
+        ratio=train_val_ratio,
+        seed=seed,
+    )
 
     # ── Copie basins (tronquée si micro-test) ───────────────────────
     dst_basins_dir.mkdir(parents=True, exist_ok=True)
@@ -253,6 +346,12 @@ Exemples :
                         help="Micro-test : limite le nombre de stations train (défaut: toutes)")
     parser.add_argument("--n-val", type=int, default=None,
                         help="Micro-test : limite le nombre de stations val (défaut: toutes)")
+    parser.add_argument("--train-val-ratio", type=float, default=DEFAULT_TRAIN_VAL_RATIO,
+                        help=f"Proportion train du split auto-généré si train/val_basins.txt "
+                             f"n'existent pas encore (défaut: {DEFAULT_TRAIN_VAL_RATIO})")
+    parser.add_argument("--stations-txt", type=str, default=None,
+                        help=f"Fichier liste de stations pour le split auto (défaut: "
+                             f"<src-dir>/{DEFAULT_STATIONS_TXT_NAME})")
     args = parser.parse_args()
 
     create_masked_dataset(
@@ -264,4 +363,6 @@ Exemples :
         seed=args.seed,
         n_train=args.n_train,
         n_val=args.n_val,
+        train_val_ratio=args.train_val_ratio,
+        stations_txt=Path(args.stations_txt) if args.stations_txt else None,
     )

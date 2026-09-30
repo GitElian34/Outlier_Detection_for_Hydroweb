@@ -1,0 +1,105 @@
+2026-09-30 09:49:58,559: Logging to /home/sar_hydro/STUDIES/EtudesEB/Test/Outlier_Detection_for_Hydroweb/runs/arlstm_DtoD96_3009_094958/output.log initialized.
+2026-09-30 09:49:58,559: ### Folder structure created at /home/sar_hydro/STUDIES/EtudesEB/Test/Outlier_Detection_for_Hydroweb/runs/arlstm_DtoD96_3009_094958
+2026-09-30 09:49:58,559: ### Run configurations for arlstm_DtoD96
+2026-09-30 09:49:58,559: experiment_name: arlstm_DtoD96
+2026-09-30 09:49:58,559: dataset: generic
+2026-09-30 09:49:58,559: data_dir: data/IA/NeuralHydroDtoD96
+2026-09-30 09:49:58,559: train_basin_file: AI/LSTM/NeuralHydroDtoD96/train_basins.txt
+2026-09-30 09:49:58,559: validation_basin_file: AI/LSTM/NeuralHydroDtoD96/val_basins.txt
+2026-09-30 09:49:58,559: train_start_date: 2016-01-01 00:00:00
+2026-09-30 09:49:58,559: train_end_date: 2025-12-31 00:00:00
+2026-09-30 09:49:58,559: validation_start_date: 2016-01-01 00:00:00
+2026-09-30 09:49:58,559: validation_end_date: 2025-12-31 00:00:00
+2026-09-30 09:49:58,559: num_workers: 4
+2026-09-30 09:49:58,559: cache_validation_data: True
+2026-09-30 09:49:58,560: dynamics_embedding: {'type': 'fc', 'hiddens': [30, 20], 'activation': 'tanh', 'dropout': 0.2}
+2026-09-30 09:49:58,560: target_variables: ['water_level']
+2026-09-30 09:49:58,560: lagged_features: {'water_level': [1]}
+2026-09-30 09:49:58,560: use_frequencies: ['1D']
+2026-09-30 09:49:58,560: autoregressive_inputs: ['water_level_shift1']
+2026-09-30 09:49:58,560: dynamic_inputs: [['precipitation_J0'], ['temperature_J0'], ['pet_J0'], ['precip_mean_J3'], ['temp_mean_J3'], ['pet_mean_J3'], ['precip_mean_J10'], ['temp_mean_J10'], ['pet_mean_J10'], ['precip_max_J10'], ['precip_last7'], ['nb_jours_pluie_J10'], ['snow_depth_J0'], ['snowmelt_J0'], ['snow_depth_mean_J3'], ['snowmelt_mean_J3'], ['snow_depth_mean_J10'], ['snowmelt_mean_J10'], ['clim_mean_20j'], ['clim_std_20j'], ['doy_sin', 'doy_cos']]
+2026-09-30 09:49:58,560: static_attributes: ['aire_km2', 'lon', 'lat', 'frac_urban', 'frac_forest', 'frac_agriculture', 'sg_clay_0_30cm', 'sg_sand_0_30cm', 'sg_silt_0_30cm', 'strahler', 'elevation_mean', 'slope_mean']
+2026-09-30 09:49:58,560: model: arlstm
+2026-09-30 09:49:58,560: head: regression
+2026-09-30 09:49:58,560: hidden_size: 256
+2026-09-30 09:49:58,560: seq_length: {'1D': 365}
+2026-09-30 09:49:58,560: predict_last_n: {'1D': 10}
+2026-09-30 09:49:58,560: batch_size: 64
+2026-09-30 09:49:58,560: output_dropout: 0.4
+2026-09-30 09:49:58,560: clip_gradient_norm: 0.8
+2026-09-30 09:49:58,560: target_noise_std: 0.01
+2026-09-30 09:49:58,560: optimizer: AdamW
+2026-09-30 09:49:58,560: learning_rate: {0: 0.0006, 12: 0.0003, 20: 0.0001}
+2026-09-30 09:49:58,560: epochs: 30
+2026-09-30 09:49:58,560: loss: NSE
+2026-09-30 09:49:58,560: initial_forget_bias: 3
+2026-09-30 09:49:58,560: save_validation_results: True
+2026-09-30 09:49:58,560: max_updates_per_epoch: 2000
+2026-09-30 09:49:58,560: validate_every: 1
+2026-09-30 09:49:58,560: validate_n_random_basins: 100
+2026-09-30 09:49:58,560: metrics: ['NSE', 'KGE', 'FHV']
+2026-09-30 09:49:58,560: device: cpu
+2026-09-30 09:49:58,560: number_of_basins: 2383
+2026-09-30 09:49:58,560: run_dir: /home/sar_hydro/STUDIES/EtudesEB/Test/Outlier_Detection_for_Hydroweb/runs/arlstm_DtoD96_3009_094958
+2026-09-30 09:49:58,560: train_dir: /home/sar_hydro/STUDIES/EtudesEB/Test/Outlier_Detection_for_Hydroweb/runs/arlstm_DtoD96_3009_094958/train_data
+2026-09-30 09:49:58,560: img_log_dir: /home/sar_hydro/STUDIES/EtudesEB/Test/Outlier_Detection_for_Hydroweb/runs/arlstm_DtoD96_3009_094958/img_log
+2026-09-30 09:49:58,563: ### Device cpu will be used for training
+2026-09-30 09:49:59,592: Loading basin data into xarray data set.
+2026-09-30 09:49:59,665: Uncaught exception
+Traceback (most recent call last):
+  File "/home/sar_hydro/STUDIES/EtudesEB/Test/Outlier_Detection_for_Hydroweb/neuralhydrology/neuralhydrology/datasetzoo/basedataset.py", line 384, in _load_or_create_xarray_dataset
+    df = df[keep_cols]
+         ~~^^^^^^^^^^^
+  File "/home/sar_hydro/STUDIES/EtudesEB/Test/Outlier_Detection_for_Hydroweb/.venv/lib/python3.13/site-packages/pandas/core/frame.py", line 4384, in __getitem__
+    indexer = self.columns._get_indexer_strict(key, "columns")[1]
+              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/home/sar_hydro/STUDIES/EtudesEB/Test/Outlier_Detection_for_Hydroweb/.venv/lib/python3.13/site-packages/pandas/core/indexes/base.py", line 6302, in _get_indexer_strict
+    self._raise_if_missing(keyarr, indexer, axis_name)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/sar_hydro/STUDIES/EtudesEB/Test/Outlier_Detection_for_Hydroweb/.venv/lib/python3.13/site-packages/pandas/core/indexes/base.py", line 6355, in _raise_if_missing
+    raise KeyError(f"{not_found} not in index")
+KeyError: "['nb_jours_pluie_J10', 'precip_max_J10'] not in index"
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/sar_hydro/STUDIES/EtudesEB/Test/Outlier_Detection_for_Hydroweb/AI_training/Entrainement.py", line 17, in <module>
+    start_run(config_file=Path("./AI_training/Yaml/ConfDtoD96.yaml"))
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/sar_hydro/STUDIES/EtudesEB/Test/Outlier_Detection_for_Hydroweb/neuralhydrology/neuralhydrology/nh_run.py", line 77, in start_run
+    start_training(config)
+    ~~~~~~~~~~~~~~^^^^^^^^
+  File "/home/sar_hydro/STUDIES/EtudesEB/Test/Outlier_Detection_for_Hydroweb/neuralhydrology/neuralhydrology/training/train.py", line 19, in start_training
+    trainer.initialize_training()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/sar_hydro/STUDIES/EtudesEB/Test/Outlier_Detection_for_Hydroweb/neuralhydrology/neuralhydrology/training/basetrainer.py", line 154, in initialize_training
+    ds = self._get_dataset()
+  File "/home/sar_hydro/STUDIES/EtudesEB/Test/Outlier_Detection_for_Hydroweb/neuralhydrology/neuralhydrology/training/basetrainer.py", line 87, in _get_dataset
+    return get_dataset(cfg=self.cfg, period="train", is_train=True, scaler=self._scaler)
+  File "/home/sar_hydro/STUDIES/EtudesEB/Test/Outlier_Detection_for_Hydroweb/neuralhydrology/neuralhydrology/datasetzoo/__init__.py", line 71, in get_dataset
+    return _datasetZooRegistry.instantiate_dataset(cfg, is_train, period, basin, additional_features, id_to_int, scaler)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/sar_hydro/STUDIES/EtudesEB/Test/Outlier_Detection_for_Hydroweb/neuralhydrology/neuralhydrology/datasetzoo/datasetregistry.py", line 92, in instantiate_dataset
+    return Dataset(cfg=cfg,
+                   is_train=is_train,
+    ...<3 lines>...
+                   id_to_int=id_to_int,
+                   scaler=scaler)
+  File "/home/sar_hydro/STUDIES/EtudesEB/Test/Outlier_Detection_for_Hydroweb/neuralhydrology/neuralhydrology/datasetzoo/genericdataset.py", line 61, in __init__
+    super(GenericDataset, self).__init__(cfg=cfg,
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+                                         is_train=is_train,
+                                         ^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+                                         id_to_int=id_to_int,
+                                         ^^^^^^^^^^^^^^^^^^^^
+                                         scaler=scaler)
+                                         ^^^^^^^^^^^^^^
+  File "/home/sar_hydro/STUDIES/EtudesEB/Test/Outlier_Detection_for_Hydroweb/neuralhydrology/neuralhydrology/datasetzoo/basedataset.py", line 142, in __init__
+    self._load_data()
+    ~~~~~~~~~~~~~~~^^
+  File "/home/sar_hydro/STUDIES/EtudesEB/Test/Outlier_Detection_for_Hydroweb/neuralhydrology/neuralhydrology/datasetzoo/basedataset.py", line 747, in _load_data
+    xr = self._load_or_create_xarray_dataset()
+  File "/home/sar_hydro/STUDIES/EtudesEB/Test/Outlier_Detection_for_Hydroweb/neuralhydrology/neuralhydrology/datasetzoo/basedataset.py", line 391, in _load_or_create_xarray_dataset
+    raise KeyError("".join(msg))
+KeyError: "The following features are not available in the data: ['nb_jours_pluie_J10', 'precip_max_J10']. These are the available features: ['precipitation_J0', 'temperature_J0', 'pet_J0', 'precip_mean_J3', 'temp_mean_J3', 'pet_mean_J3', 'precip_mean_J10', 'temp_mean_J10', 'pet_mean_J10', 'precip_mean_J27', 'temp_mean_J27', 'pet_mean_J27', 'precip_max_J27', 'precip_last7', 'nb_jours_pluie_J27', 'precip_mean_J14', 'snow_depth_J0', 'snowmelt_J0', 'snow_depth_mean_J3', 'snowmelt_mean_J3', 'snow_depth_mean_J10', 'snowmelt_mean_J10', 'snow_depth_mean_J27', 'snowmelt_mean_J27', 'clim_mean', 'clim_std', 'clim_mean_20j', 'clim_std_20j', 'doy_sin', 'doy_cos', 'water_level', 'water_level_shift1']"

@@ -19,13 +19,14 @@ import argparse
 import logging
 from pathlib import Path
 
-from create_dataset_masked import (
+from Create_dataset_masked import (
     create_masked_dataset,
     DEFAULT_SRC_DIR,
     DEFAULT_DST_ROOT,
     DEFAULT_BASINS_SRC_DIR,
     DEFAULT_BASINS_DST_ROOT,
     DEFAULT_SEED,
+    DEFAULT_TRAIN_VAL_RATIO,
 )
 
 logging.basicConfig(
@@ -46,9 +47,15 @@ def create_all_masked_datasets(
     basins_src_dir: Path = DEFAULT_BASINS_SRC_DIR,
     basins_dst_root: Path = DEFAULT_BASINS_DST_ROOT,
     seed: int = DEFAULT_SEED,
+    train_val_ratio: float = DEFAULT_TRAIN_VAL_RATIO,
+    stations_txt: Path | None = None,
 ) -> dict:
     """
     Génère un dataset masqué pour chaque % de la liste.
+
+    Le split train/val (train_basins.txt/val_basins.txt) est généré
+    automatiquement au premier % traité s'il n'existe pas encore (voir
+    create_dataset_masked.py) — les % suivants réutilisent le même split.
 
     Returns:
         {pct: {"ok": bool, "result": ..., "error": str | None}}
@@ -63,7 +70,7 @@ def create_all_masked_datasets(
             out = create_masked_dataset(
                 pct=pct, src_dir=src_dir, dst_root=dst_root,
                 basins_src_dir=basins_src_dir, basins_dst_root=basins_dst_root,
-                seed=seed,
+                seed=seed, train_val_ratio=train_val_ratio, stations_txt=stations_txt,
             )
             results[pct] = {"ok": True, "result": out, "error": None}
         except Exception as e:
@@ -103,6 +110,11 @@ Exemples :
     parser.add_argument("--basins-src-dir", type=str, default=str(DEFAULT_BASINS_SRC_DIR))
     parser.add_argument("--basins-dst-root", type=str, default=str(DEFAULT_BASINS_DST_ROOT))
     parser.add_argument("--seed", type=int, default=DEFAULT_SEED)
+    parser.add_argument("--train-val-ratio", type=float, default=DEFAULT_TRAIN_VAL_RATIO,
+                        help=f"Proportion train du split auto-généré si train/val_basins.txt "
+                             f"n'existent pas encore (défaut: {DEFAULT_TRAIN_VAL_RATIO})")
+    parser.add_argument("--stations-txt", type=str, default=None,
+                        help="Fichier liste de stations pour le split auto (défaut: <src-dir>/stations_insitu.txt)")
     args = parser.parse_args()
 
     create_all_masked_datasets(
@@ -112,4 +124,6 @@ Exemples :
         basins_src_dir=Path(args.basins_src_dir),
         basins_dst_root=Path(args.basins_dst_root),
         seed=args.seed,
+        train_val_ratio=args.train_val_ratio,
+        stations_txt=Path(args.stations_txt) if args.stations_txt else None,
     )

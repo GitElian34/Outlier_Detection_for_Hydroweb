@@ -1,0 +1,228 @@
+attribute_means:
+  aire_km2: 1270.4878304657993
+  elevation_mean: 506.70451112043645
+  frac_agriculture: 0.5278868652958456
+  frac_forest: 0.3063300461603021
+  frac_urban: 0.040191900965169954
+  lat: 46.27779271728326
+  lon: 2.759364896179606
+  sg_clay_0_30cm: 26.39847251363827
+  sg_sand_0_30cm: 28.87790600083928
+  sg_silt_0_30cm: 43.92642887117079
+  slope_mean: 11.598322702475873
+  strahler: 2.892572387746538
+attribute_stds:
+  aire_km2: 4711.06637980706
+  elevation_mean: 472.2915241758152
+  frac_agriculture: 0.2876646108965296
+  frac_forest: 0.19544240934067905
+  frac_urban: 0.0458384982679723
+  lat: 2.187601805815425
+  lon: 2.8472423020866486
+  sg_clay_0_30cm: 4.993217029691818
+  sg_sand_0_30cm: 10.16476694307909
+  sg_silt_0_30cm: 9.134892827209683
+  slope_mean: 11.044340681210318
+  strahler: 1.3053044481887834
+xarray_feature_scale:
+  coords: {}
+  attrs: {}
+  dims: {}
+  data_vars:
+    clim_mean_20j:
+      dims: []
+      attrs: {}
+      data: 0.5393229126930237
+    clim_std_20j:
+      dims: []
+      attrs: {}
+      data: 0.36252960562705994
+    doy_cos:
+      dims: []
+      attrs: {}
+      data: 0.7073966264724731
+    doy_sin:
+      dims: []
+      attrs: {}
+      data: 0.7068164348602295
+    nb_jours_pluie_J27:
+      dims: []
+      attrs: {}
+      data: 4.700713634490967
+    pet_J0:
+      dims: []
+      attrs: {}
+      data: 4.325085163116455
+    pet_mean_J10:
+      dims: []
+      attrs: {}
+      data: 3.919586658477783
+    pet_mean_J3:
+      dims: []
+      attrs: {}
+      data: 4.110551357269287
+    precip_last7:
+      dims: []
+      attrs: {}
+      data: 2.740895986557007
+    precip_max_J27:
+      dims: []
+      attrs: {}
+      data: 10.629365921020508
+    precip_mean_J10:
+      dims: []
+      attrs: {}
+      data: 2.403015613555908
+    precip_mean_J3:
+      dims: []
+      attrs: {}
+      data: 3.67763352394104
+    precipitation_J0:
+      dims: []
+      attrs: {}
+      data: 5.2032952308654785
+    snow_depth_J0:
+      dims: []
+      attrs: {}
+      data: 347.4414367675781
+    snow_depth_mean_J10:
+      dims: []
+      attrs: {}
+      data: 346.987060546875
+    snow_depth_mean_J3:
+      dims: []
+      attrs: {}
+      data: 347.3546142578125
+    snowmelt_J0:
+      dims: []
+      attrs: {}
+      data: 1.1396061182022095
+    snowmelt_mean_J10:
+      dims: []
+      attrs: {}
+      data: 1.005042314529419
+    snowmelt_mean_J3:
+      dims: []
+      attrs: {}
+      data: 1.0841591358184814
+    temp_mean_J10:
+      dims: []
+      attrs: {}
+      data: 6.705390930175781
+    temp_mean_J3:
+      dims: []
+      attrs: {}
+      data: 6.941226959228516
+    temperature_J0:
+      dims: []
+      attrs: {}
+      data: 7.061972141265869
+    water_level:
+      dims: []
+      attrs: {}
+      data: 0.9910538196563721
+    water_level_shift1:
+      dims: []
+      attrs: {}
+      data: 0.9910943508148193
+xarray_feature_center:
+  coords: {}
+  attrs: {}
+  dims: {}
+  data_vars:
+    clim_mean_20j:
+      dims: []
+      attrs: {}
+      data: 0.00037835139664821327
+    clim_std_20j:
+      dims: []
+      attrs: {}
+      data: 0.7648281455039978
+    doy_cos:
+      dims: []
+      attrs: {}
+      data: 0.000821240886580199
+    doy_sin:
+      dims: []
+      attrs: {}
+      data: -4.899233907451617e-09
+    nb_jours_pluie_J27:
+      dims: []
+      attrs: {}
+      data: 10.93372631072998
+    pet_J0:
+      dims: []
+      attrs: {}
+      data: 5.033283710479736
+    pet_mean_J10:
+      dims: []
+      attrs: {}
+      data: 5.033211708068848
+    pet_mean_J3:
+      dims: []
+      attrs: {}
+      data: 5.0332231521606445
+    precip_last7:
+      dims: []
+      attrs: {}
+      data: 2.7428810596466064
+    precip_max_J27:
+      dims: []
+      attrs: {}
+      data: 17.566579818725586
+    precip_mean_J10:
+      dims: []
+      attrs: {}
+      data: 2.744915723800659
+    precip_mean_J3:
+      dims: []
+      attrs: {}
+      data: 2.7399446964263916
+    precipitation_J0:
+      dims: []
+      attrs: {}
+      data: 2.7392327785491943
+    snow_depth_J0:
+      dims: []
+      attrs: {}
+      data: 48.92898941040039
+    snow_depth_mean_J10:
+      dims: []
+      attrs: {}
+      data: 48.902347564697266
+    snow_depth_mean_J3:
+      dims: []
+      attrs: {}
+      data: 48.9220085144043
+    snowmelt_J0:
+      dims: []
+      attrs: {}
+      data: 0.20451442897319794
+    snowmelt_mean_J10:
+      dims: []
+      attrs: {}
+      data: 0.2043592780828476
+    snowmelt_mean_J3:
+      dims: []
+      attrs: {}
+      data: 0.20450641214847565
+    temp_mean_J10:
+      dims: []
+      attrs: {}
+      data: 11.415435791015625
+    temp_mean_J3:
+      dims: []
+      attrs: {}
+      data: 11.411218643188477
+    temperature_J0:
+      dims: []
+      attrs: {}
+      data: 11.409427642822266
+    water_level:
+      dims: []
+      attrs: {}
+      data: -0.0004770420491695404
+    water_level_shift1:
+      dims: []
+      attrs: {}
+      data: -0.0005108494660817087

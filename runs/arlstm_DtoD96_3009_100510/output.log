@@ -1,0 +1,87 @@
+2026-09-30 10:05:10,401: Logging to /home/sar_hydro/STUDIES/EtudesEB/Test/Outlier_Detection_for_Hydroweb/runs/arlstm_DtoD96_3009_100510/output.log initialized.
+2026-09-30 10:05:10,401: ### Folder structure created at /home/sar_hydro/STUDIES/EtudesEB/Test/Outlier_Detection_for_Hydroweb/runs/arlstm_DtoD96_3009_100510
+2026-09-30 10:05:10,401: ### Run configurations for arlstm_DtoD96
+2026-09-30 10:05:10,401: experiment_name: arlstm_DtoD96
+2026-09-30 10:05:10,401: dataset: generic
+2026-09-30 10:05:10,402: data_dir: data/IA/NeuralHydroDtoD96
+2026-09-30 10:05:10,402: train_basin_file: AI/LSTM/NeuralHydroDtoD96/train_basins.txt
+2026-09-30 10:05:10,402: validation_basin_file: AI/LSTM/NeuralHydroDtoD96/val_basins.txt
+2026-09-30 10:05:10,402: train_start_date: 2016-01-01 00:00:00
+2026-09-30 10:05:10,402: train_end_date: 2025-12-31 00:00:00
+2026-09-30 10:05:10,402: validation_start_date: 2016-01-01 00:00:00
+2026-09-30 10:05:10,402: validation_end_date: 2025-12-31 00:00:00
+2026-09-30 10:05:10,402: num_workers: 4
+2026-09-30 10:05:10,402: cache_validation_data: True
+2026-09-30 10:05:10,402: dynamics_embedding: {'type': 'fc', 'hiddens': [30, 20], 'activation': 'tanh', 'dropout': 0.2}
+2026-09-30 10:05:10,402: target_variables: ['water_level']
+2026-09-30 10:05:10,402: lagged_features: {'water_level': [1]}
+2026-09-30 10:05:10,402: use_frequencies: ['1D']
+2026-09-30 10:05:10,402: autoregressive_inputs: ['water_level_shift1']
+2026-09-30 10:05:10,402: dynamic_inputs: ['precipitation_J0', 'temperature_J0', 'pet_J0', 'precip_mean_J3', 'temp_mean_J3', 'pet_mean_J3', 'precip_mean_J10', 'temp_mean_J10', 'pet_mean_J10', 'precip_max_J27', 'precip_last7', 'nb_jours_pluie_J27', 'snow_depth_J0', 'snowmelt_J0', 'snow_depth_mean_J3', 'snowmelt_mean_J3', 'snow_depth_mean_J10', 'snowmelt_mean_J10', 'clim_mean_20j', 'clim_std_20j', 'doy_sin', 'doy_cos']
+2026-09-30 10:05:10,402: static_attributes: ['aire_km2', 'lon', 'lat', 'frac_urban', 'frac_forest', 'frac_agriculture', 'sg_clay_0_30cm', 'sg_sand_0_30cm', 'sg_silt_0_30cm', 'strahler', 'elevation_mean', 'slope_mean']
+2026-09-30 10:05:10,402: model: arlstm
+2026-09-30 10:05:10,402: head: regression
+2026-09-30 10:05:10,402: hidden_size: 256
+2026-09-30 10:05:10,402: seq_length: {'1D': 365}
+2026-09-30 10:05:10,402: predict_last_n: {'1D': 10}
+2026-09-30 10:05:10,402: batch_size: 64
+2026-09-30 10:05:10,402: output_dropout: 0.4
+2026-09-30 10:05:10,402: clip_gradient_norm: 0.8
+2026-09-30 10:05:10,402: target_noise_std: 0.01
+2026-09-30 10:05:10,402: optimizer: AdamW
+2026-09-30 10:05:10,402: learning_rate: {0: 0.0006, 12: 0.0003, 20: 0.0001}
+2026-09-30 10:05:10,402: epochs: 30
+2026-09-30 10:05:10,402: loss: NSE
+2026-09-30 10:05:10,402: initial_forget_bias: 3
+2026-09-30 10:05:10,402: save_validation_results: True
+2026-09-30 10:05:10,402: max_updates_per_epoch: 2000
+2026-09-30 10:05:10,403: validate_every: 1
+2026-09-30 10:05:10,403: validate_n_random_basins: 100
+2026-09-30 10:05:10,403: metrics: ['NSE', 'KGE', 'FHV']
+2026-09-30 10:05:10,403: device: cpu
+2026-09-30 10:05:10,403: number_of_basins: 2383
+2026-09-30 10:05:10,403: run_dir: /home/sar_hydro/STUDIES/EtudesEB/Test/Outlier_Detection_for_Hydroweb/runs/arlstm_DtoD96_3009_100510
+2026-09-30 10:05:10,403: train_dir: /home/sar_hydro/STUDIES/EtudesEB/Test/Outlier_Detection_for_Hydroweb/runs/arlstm_DtoD96_3009_100510/train_data
+2026-09-30 10:05:10,403: img_log_dir: /home/sar_hydro/STUDIES/EtudesEB/Test/Outlier_Detection_for_Hydroweb/runs/arlstm_DtoD96_3009_100510/img_log
+2026-09-30 10:05:10,405: ### Device cpu will be used for training
+2026-09-30 10:05:11,679: Loading basin data into xarray data set.
+2026-09-30 10:07:11,721: Calculating target variable stds per basin
+2026-09-30 10:07:13,625: The following basins had not enough valid target values to calculate a standard deviation: H352201011, V014000201. NSE loss values for this basin will be NaN.
+2026-09-30 10:07:16,119: Create lookup table and convert to pytorch tensor
+2026-09-30 10:08:44,992: These basins do not have a single valid sample in the train period: ['Q305401001', 'U212202001']
+2026-09-30 10:12:13,686: Uncaught exception
+Traceback (most recent call last):
+  File "/home/sar_hydro/STUDIES/EtudesEB/Test/Outlier_Detection_for_Hydroweb/AI_training/Entrainement.py", line 17, in <module>
+    start_run(config_file=Path("./AI_training/Yaml/ConfDtoD96.yaml"))
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/sar_hydro/STUDIES/EtudesEB/Test/Outlier_Detection_for_Hydroweb/neuralhydrology/neuralhydrology/nh_run.py", line 77, in start_run
+    start_training(config)
+    ~~~~~~~~~~~~~~^^^^^^^^
+  File "/home/sar_hydro/STUDIES/EtudesEB/Test/Outlier_Detection_for_Hydroweb/neuralhydrology/neuralhydrology/training/train.py", line 20, in start_training
+    trainer.train_and_validate()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/sar_hydro/STUDIES/EtudesEB/Test/Outlier_Detection_for_Hydroweb/neuralhydrology/neuralhydrology/training/basetrainer.py", line 232, in train_and_validate
+    self._train_epoch(epoch=epoch)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/sar_hydro/STUDIES/EtudesEB/Test/Outlier_Detection_for_Hydroweb/neuralhydrology/neuralhydrology/training/basetrainer.py", line 323, in _train_epoch
+    predictions = self.model(data)
+  File "/home/sar_hydro/STUDIES/EtudesEB/Test/Outlier_Detection_for_Hydroweb/.venv/lib/python3.13/site-packages/torch/nn/modules/module.py", line 1783, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/home/sar_hydro/STUDIES/EtudesEB/Test/Outlier_Detection_for_Hydroweb/.venv/lib/python3.13/site-packages/torch/nn/modules/module.py", line 1794, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/sar_hydro/STUDIES/EtudesEB/Test/Outlier_Detection_for_Hydroweb/neuralhydrology/neuralhydrology/modelzoo/arlstm.py", line 128, in forward
+    cell_output, (h_0, c_0) = self.cell(cell_inputs, (h_0, c_0))
+                              ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/sar_hydro/STUDIES/EtudesEB/Test/Outlier_Detection_for_Hydroweb/.venv/lib/python3.13/site-packages/torch/nn/modules/module.py", line 1783, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/home/sar_hydro/STUDIES/EtudesEB/Test/Outlier_Detection_for_Hydroweb/.venv/lib/python3.13/site-packages/torch/nn/modules/module.py", line 1794, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/sar_hydro/STUDIES/EtudesEB/Test/Outlier_Detection_for_Hydroweb/.venv/lib/python3.13/site-packages/torch/nn/modules/rnn.py", line 1164, in forward
+    result = _VF.lstm(
+        input,
+    ...<7 lines>...
+        self.batch_first,
+    )
+KeyboardInterrupt
